@@ -779,4 +779,161 @@ public:
 
 			graphic->render();
 		}
-	}
+	}void saveScreen(int score, int mode = 0, int level = 0)
+	{
+		int top = 8;
+		int left = 58;
+		vector<wstring> blank = { L"███████████████████████" };
+		vector<wstring> save{ L"" };
+		vector<wstring> gameScore;
+		graphic->openFrame(left, top - 1, 29, 24);
+		GameMenu* saveTitle = new Button("saveTitle");
+		graphic->setBufferWhite(graphic->getBuffer(saveTitle->getBufferKey()), left + 1, top + 1, 0, 7);
+		GameMenu* slots = new Button("slots");
+		graphic->createFrame(left + 2, top + 4, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 7, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 10, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 13, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 16, blank[0].length() + 2, 3);
+		GameMenu* backButton = new Button("back");
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 };
+
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+
+			// default color
+			graphic->setBuffer(graphic->getBuffer(slots->getBufferKey()), left + 7, top + 2, 0, 7);
+			for (int i = 0; i < 5; ++i)
+			{
+				if (saved[i])
+				{
+					string tmp = "SaveFile";
+					tmp += char(i + '1');
+					tmp += ".txt";
+					ifstream saveFile{ tmp };
+					int tmpScore;
+					saveFile >> tmpScore;
+
+					string mode;
+					saveFile >> mode;
+					wstring tmpppp;
+					if (mode[0] == 'i')
+					{
+						save[0] = L"Endless. Score: ";
+						tmpppp = toWstring(tmpScore);
+					}
+					else
+					{
+						save[0] = L"Timed. Level: ";
+						tmpppp = toWstring(level);
+					}
+					save[0] += tmpppp;
+
+					int saveLength = save[0].length();
+
+					int n = blank[0].length() - save[0].length();
+					for (int j = 0; j < n; ++j)
+					{
+						save[0] += L' ';
+					}
+					graphic->setBufferWhite(save, left + 3, top + 5 + 3 * i, BG, whiteDark);
+
+					save[0].erase(saveLength, save[0].length() - tmpppp.length());
+					saveFile.close();
+				}
+				else
+					graphic->setBufferWhite(blank, left + 3, top + 5 + 3 * i, whiteDark, BG);
+			}
+			graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 20, 0, 7);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 5)
+					return;
+				else
+				{
+					choice = (choice + 6) % 6;
+					saved[choice] = 1;
+					string tmp = "SaveFile";
+					tmp += char(choice + '1');
+					tmp += ".txt";
+					ofstream saveFile{ tmp };
+					saveFile << score;
+					saveFile << (mode ? " inf " : " lvl ");
+					if (!mode)
+						saveFile << level;
+					saveFile.close();
+					return;
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 6 - 1) % 6;
+			}
+			else if (bKeyGame[2] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 6;
+			}
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 5:
+				graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 20, 7, 0);
+				break;
+			default:
+				if (saved[choice])
+				{
+					string tmp = "SaveFile";
+					tmp += char(choice + '1');
+					tmp += ".txt";
+					ifstream saveFile{ tmp };
+					int tmpScore;
+					saveFile >> tmpScore;
+
+					string mode;
+					saveFile >> mode;
+					wstring tmpppp;
+					if (mode[0] == 'i')
+					{
+						save[0] = L"Endless. Score: ";
+						tmpppp = toWstring(tmpScore);
+					}
+					else
+					{
+						save[0] = L"Timed. Level: ";
+						tmpppp = toWstring(level);
+					}
+					save[0] += tmpppp;
+
+					int saveLength = save[0].length();
+
+					int n = blank[0].length() - save[0].length();
+					for (int j = 0; j < n; ++j)
+					{
+						save[0] += L' ';
+					}
+					graphic->setBufferWhite(save, left + 3, top + 5 + 3 * choice, whiteDark, BG);
+
+					save[0].erase(saveLength, save[0].length() - tmpppp.length());
+					saveFile.close();
+				}
+				else
+					graphic->setBufferWhite(blank, left + 3, top + 5 + 3 * choice, BG, whiteDark);
+				break;
+			}
+
+			graphic->render();
+		}
+	};
