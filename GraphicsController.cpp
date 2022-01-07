@@ -53,3 +53,42 @@ void GraphicsController::charToBlock(vector<wstring>& graphics) {
 		}
 	}
 }
+
+void GraphicsController::openFrame(int x, int y, int w, int h) {
+	buffer[y * screenWidth + x] = bufferStorage["frame"][0][0];
+	buffer[y * screenWidth + x + w - 1] = bufferStorage["frame"][0][2];
+	color[y * screenWidth + x] = 7;
+	color[y * screenWidth + x + w - 1] = 7;
+	for (int i = 1; i < w - 1; ++i) {
+		buffer[y * screenWidth + x + i] = bufferStorage["frame"][0][1];
+		color[y * screenWidth + x + i] = 7;
+	}
+	int temp = 2;
+	while (1) {
+		buffer[(y + temp - 1) * screenWidth + x] = bufferStorage["frame"][2][0];
+		buffer[(y + temp - 1) * screenWidth + x + w - 1] = bufferStorage["frame"][2][2];
+		color[(y + temp - 1) * screenWidth + x] = 7;
+		color[(y + temp - 1) * screenWidth + x + w - 1] = 7;
+		for (int i = 1; i < w - 1; ++i) {
+			buffer[(y + temp - 1) * screenWidth + x + i] = bufferStorage["frame"][2][1];
+			color[(y + temp - 1) * screenWidth + x + i] = 7;
+		}
+		if (temp > 2) {
+			buffer[(y + temp - 2) * screenWidth + x] = bufferStorage["frame"][1][0];
+			buffer[(y + temp - 2) * screenWidth + x + w - 1] = bufferStorage["frame"][1][2];
+			color[(y + temp - 2) * screenWidth + x] = 7;
+			color[(y + temp - 2) * screenWidth + x + w - 1] = 7;
+			for (int j = 1; j < w - 1; ++j) {
+				buffer[(y + temp - 2) * screenWidth + x + j] = L' ';
+				color[(y + temp - 2) * screenWidth + x + j] = 7;
+			}
+		}
+		temp++;
+		if (temp == h + 1) {
+			render();
+			break;
+		}
+		render();
+		delay(1000 / (FRAMERATE));
+	}
+}
