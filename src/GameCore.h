@@ -258,3 +258,78 @@ public:
 			delay(83 - i);
 		}
 	}
+	int selectModeScreen()
+	{
+		int top = 15;
+		int left = 58;
+		graphic->openFrame(left, top, 31, 9);
+		GameMenu* chooseTitle = new Button("chooseTitle");
+		graphic->setBufferWhite(graphic->getBuffer(chooseTitle->getBufferKey()), left + 1, top + 2, 0, 7);
+
+		GameMenu* backButton = new Button("back");
+		GameMenu* levelMode = new Button("levelMode");
+		GameMenu* infinityMode = new Button("infinityMode");
+
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 }; // Check ingame input
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+
+			// default color
+			graphic->setBuffer(graphic->getBuffer(levelMode->getBufferKey()), left + 8, top + 4, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(infinityMode->getBufferKey()), left + 8, top + 5, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 10, top + 6, 0, 7);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{ // Enter - select
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 0)
+				{
+					return 1;
+				}
+				else if (choice == 1)
+				{
+					return 2;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{ // W - Move up
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice - 1 + 3) % 3;
+			}
+			else if (bKeyGame[2] == 1)
+			{ // S - Move down
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 3;
+			}
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 0: // Level mode
+				graphic->setBuffer(graphic->getBuffer(levelMode->getBufferKey()), left + 8, top + 4, 7, 0);
+				break;
+			case 1: // Ininity mode
+				graphic->setBuffer(graphic->getBuffer(infinityMode->getBufferKey()), left + 8, top + 5, 7, 0);
+				break;
+			case 2: // Back
+				graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 10, top + 6, 7, 0);
+				break;
+			default:
+				break;
+			}
+
+			graphic->render();
+		}
+	}
