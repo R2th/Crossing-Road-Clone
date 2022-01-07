@@ -122,3 +122,126 @@ public:
 		}
 		graphic->clearBuffer();
 	}
+
+	void titleScreen()
+	{
+		GameMenu* title = new Button(46, 8, "title");
+		GameMenu* startButton = new Button("start");
+		GameMenu* loadButton = new Button("load");
+		GameMenu* settingButton = new Button("settings");
+		GameMenu* exitButton = new Button("exit");
+		Obstacles* enemy1 = new Obstacles(20, 5, 1, BG, 1, "enemy1", graphic);
+		Obstacles* enemy2 = new Obstacles(135, 25, 2, BG, 3, "enemy2", graphic);
+		Obstacles* enemy3 = new Obstacles(30, 30, 2, BG, 4, "enemy3", graphic);
+		Obstacles* enemy4 = new Obstacles(115, 35, 3, BG, 6, "enemy4", graphic);
+
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 };
+		if (soundOn)
+			mciSendString(song_intro, NULL, 0, NULL);
+		while (1)
+		{
+			// slow down the speed for "sensible" input
+			delay(1000 / (FRAMERATE / 8));
+			graphic->clearBuffer();
+			graphic->clearStars();
+
+			// enemies and stars
+			graphic->randomStars();
+
+			enemy1->render(graphic, 0);
+			enemy2->render(graphic, 0);
+			enemy3->render(graphic, 0);
+			enemy4->render(graphic, 0);
+
+			enemy1->move(2, 0);
+			enemy2->move(-2, 0);
+			enemy3->move(2, 0);
+			enemy4->move(-2, 0);
+
+			// default color
+			graphic->setBufferWhite(graphic->getBuffer(title->getBufferKey()), 46, 11, BG, whiteDark);
+			graphic->setBuffer(graphic->getBuffer(startButton->getBufferKey()), 68, 20, BG, whiteDark);
+			graphic->setBuffer(graphic->getBuffer(loadButton->getBufferKey()), 68, 21, BG, whiteDark);
+			graphic->setBuffer(graphic->getBuffer(settingButton->getBufferKey()), 68, 22, BG, whiteDark);
+			graphic->setBuffer(graphic->getBuffer(exitButton->getBufferKey()), 68, 23, BG, whiteDark);
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 0:
+				graphic->setBuffer(graphic->getBuffer(startButton->getBufferKey()), 68, 20, whiteDark, BG);
+				break;
+			case 1:
+				graphic->setBuffer(graphic->getBuffer(loadButton->getBufferKey()), 68, 21, whiteDark, BG);
+				break;
+			case 2:
+				graphic->setBuffer(graphic->getBuffer(settingButton->getBufferKey()), 68, 22, whiteDark, BG);
+				break;
+			case 3:
+				graphic->setBuffer(graphic->getBuffer(exitButton->getBufferKey()), 68, 23, whiteDark, BG);
+				break;
+			default:
+				break;
+			}
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 0)
+				{
+					int play = selectModeScreen();
+					if (play)
+					{
+						mciSendString(L"pause song_intro.wav", NULL, 0, NULL);
+						loadingScreen();
+						int level = 1;
+						while (level)
+						{
+							if (play == 1)
+								level = playScreen1(level, 0); // aaaaaaaaaaaaaaaaaaaaaaaaa
+							else
+								level = playScreen(level);
+						}
+						if (soundOn)
+							mciSendString(L"resume song_intro.wav", NULL, 0, NULL);
+					}
+				}
+				else if (choice == 1)
+				{
+					loadScreen();
+				}
+				else if (choice == 2)
+				{
+					settingsScreen();
+				}
+				else
+				{
+					mciSendString(L"stop song_intro", NULL, 0, NULL);
+					exitScreen();
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				// mciSendStrings needs to finish the previous instance of the same sound first before playing it again
+				// However, PlaySound will stop the previous PlaySound command and play the current one
+				// so PlaySound should be used here
+				choice = (choice + 4 - 1) % 4;
+			}
+			else if (bKeyGame[2] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 4;
+			}
+
+			// graphic->createFrame(0, 0, 145, 40);
+			graphic->render();
+		}
+	}
