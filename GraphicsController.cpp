@@ -92,3 +92,35 @@ void GraphicsController::openFrame(int x, int y, int w, int h) {
 		delay(1000 / (FRAMERATE));
 	}
 }
+
+void GraphicsController::createFrame(int x, int y, int w, int h, bool transparentBG = true, bool isBlackBG = true) {
+	int Bg = isBlackBG ? black : blueDark;
+	buffer[y * screenWidth + x] = bufferStorage["frame"][0][0];
+	buffer[y * screenWidth + x + w - 1] = bufferStorage["frame"][0][2];
+	buffer[(y + h - 1) * screenWidth + x] = bufferStorage["frame"][2][0];
+	buffer[(y + h - 1) * screenWidth + x + w - 1] = bufferStorage["frame"][2][2];
+	color[y * screenWidth + x] = Bg * 16 + white;
+	color[y * screenWidth + x + w - 1] = Bg * 16 + white;
+	color[(y + h - 1) * screenWidth + x] = Bg * 16 + white;
+	color[(y + h - 1) * screenWidth + x + w - 1] = Bg * 16 + white;
+	for (int i = 1; i < w - 1; ++i) {
+		buffer[y * screenWidth + x + i] = bufferStorage["frame"][0][1];
+		buffer[(y + h - 1) * screenWidth + x + i] = bufferStorage["frame"][2][1];
+		color[y * screenWidth + x + i] = Bg * 16 + white;
+		color[(y + h - 1) * screenWidth + x + i] = Bg * 16 + white;
+	}
+	for (int i = 1; i < h - 1; ++i) {
+		buffer[(y + i) * screenWidth + x] = bufferStorage["frame"][1][0];
+		buffer[(y + i) * screenWidth + x + w - 1] = bufferStorage["frame"][1][2];
+		color[(y + i) * screenWidth + x] = Bg * 16 + white;
+		color[(y + i) * screenWidth + x + w - 1] = Bg * 16 + white;
+	}
+	if (!transparentBG) {
+		for (int i = 1; i < h - 1; ++i) {
+			for (int j = 1; j < w - 1; ++j) {
+				buffer[(y + i) * screenWidth + x + j] = L' ';
+				color[(y + i) * screenWidth + x + j] = Bg * 16 + white;
+			}
+		}
+	}
+}
