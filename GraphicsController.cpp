@@ -289,3 +289,21 @@ void GraphicsController::copyStarBuffer(int bg, int ch) {
 		}
 	}
 }
+
+void GraphicsController::glitch() {
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		color[i] = whiteDark * 16 + black;
+	}
+	render();
+	delay(250);
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		color[i] = black * 16 + whiteDark;
+	}
+	render();
+	delay(125);
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		color[i] = whiteDark * 16 + black;
+	}
+	render();
+	delay(125);
+}
