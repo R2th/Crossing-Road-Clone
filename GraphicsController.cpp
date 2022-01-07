@@ -307,3 +307,37 @@ void GraphicsController::glitch() {
 	render();
 	delay(125);
 }
+
+wstring GraphicsController::line(wstring pattern, int length) {
+	wstring res;
+	for (int i = 0; i < length / pattern.length(); i++)
+		res += pattern;
+	return res;
+}
+wstring GraphicsController::time_to_wstring(int t) { // From 125 to 02:05
+	int m = t / 60;
+	int s = t % 60;
+	wstring res = L"0";
+	res += L'0' + m;
+	res += ':';
+	res += L'0' + s / 10;
+	res += L'0' + s % 10;
+	return res;
+}
+
+void GraphicsController::progressBar(int elapsed, int duration, int x, int y) {
+	// Draw bar
+	wstring bar;
+	for (int i = 0; i < 100; i++)
+		bar += L' ';
+	setBuffer(bar, x, y, white, black);
+	// Draw progress
+	for (int i = 100; i > 0; i--) {
+		if (i < elapsed * 100 / duration)
+			setBuffer(L"█", x + 100 - i, y, black, black);
+		else setBuffer(L"█", x + 100 - i, y, blueDark, white);
+	}
+	// Draw time
+	setBuffer(time_to_wstring(elapsed), x - 6, y, black, white);
+	setBuffer(time_to_wstring(duration), x + 104, y, black, white);
+}
