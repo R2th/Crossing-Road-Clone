@@ -1305,3 +1305,70 @@ public:
 			graphic->render();
 		}
 	};
+	void exitScreen()
+	{
+		graphic->clearBuffer();
+		GameMenu* exitTitle = new Button("exitTitle");
+		graphic->setBuffer(graphic->getBuffer(exitTitle->getBufferKey()), 46, 19, BG, 7);
+		graphic->createFrame(0, 0, 145, 40);
+		graphic->render();
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 10));
+			if (GetAsyncKeyState(VK_RETURN))
+				exit(0);
+		}
+	}
+	void gameoverScreen(int score = 0)
+	{
+		int top = 8;
+		int left = 46;
+		graphic->clearBuffer();
+		if (soundOn)
+			PlaySound(TEXT("gameOver.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		GameMenu* gameoverTitle = new Button("gameoverTitle");
+		GameMenu* inspirationalText = new Button("inspirationalText");
+		GameMenu* scoreThingi = new Button("score");
+		GameMenu* backButton = new Button("back");
+		vector<wstring> scoreCounter;
+		toVwstring(score, scoreCounter);
+		int length = (17 - (6 + scoreCounter[0].length())) / 2;
+		graphic->setBuffer(graphic->getBuffer(gameoverTitle->getBufferKey()), left, top, 7, BG);
+		graphic->setBufferWhite(graphic->getBuffer(scoreThingi->getBufferKey()), left + 34 + length, top + 6, 7, BG);
+		graphic->setBufferWhite(scoreCounter, left + 34 + length + 6, top + 6, 7, BG);
+		graphic->setBuffer(graphic->getBuffer(inspirationalText->getBufferKey()), left + 12, top + 20, BG, 7);
+		graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 21, top + 22, 7, BG);
+
+		graphic->createFrame(0, 0, 145, 40);
+		graphic->render();
+		int count = 0;
+		while (!GetAsyncKeyState(VK_RETURN))
+		{
+			delay(1000 / (FRAMERATE / 8));
+			if (GetAsyncKeyState('W') || GetAsyncKeyState('S'))
+				count++;
+			if (count == 10)
+			{
+				GameMenu* easterEgg2 = new Button("easterEgg2");
+				graphic->setBuffer(graphic->getBuffer(easterEgg2->getBufferKey()), left + 11, top + 24, BG, 7);
+				graphic->render();
+			}
+		}
+		if (soundOn)
+			mciSendString(enter, NULL, 0, NULL);
+	}
+
+	bool checkCollision(vector<GameLane*> lanes)
+	{
+		BOUNDINGBOX pla = player->getBoundingBox();
+		int lane = pla.y / LANE_HEIGHT;
+		if (lane - 1 < 0 || lane > lanes.size())
+			return false;
+		GameLane* tmp = lanes[lane - 1];
+		if (tmp->checkCollision(pla))
+		{
+			return true;
+		}
+		return false;
+	}
+};
