@@ -27,13 +27,13 @@ public:
 
 	virtual void move(int x, int y) = 0;
 
-	// void render(GraphicsController*& graphic, int bgColor, int fgColor) {
-	// 	graphic->setBufferObject(graphic->getBuffer(bufferKey), x, y, bgColor, fgColor);
-	// }
+	void render(GraphicsController*& graphic, int bgColor, int fgColor) {
+		graphic->setBufferObject(graphic->getBuffer(bufferKey), x, y, bgColor, fgColor);
+	}
 
-	// void clearOldPos(GraphicsController*& graphic, int bgColor, int fgColor) {
-	// 	graphic->setBufferObject(graphic->getBuffer(bufferKey + "_clear"), oldX, oldY, bgColor, fgColor);
-	// }
+	void clearOldPos(GraphicsController*& graphic, int bgColor, int fgColor) {
+		graphic->setBufferObject(graphic->getBuffer(bufferKey + "_clear"), oldX, oldY, bgColor, fgColor);
+	}
 
 	// // WARNING: ONLY BE CALLED IN CONSTRUCTOR OF GAMELANE
 	// // YOU HAVE BEEN WARNED
