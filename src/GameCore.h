@@ -44,3 +44,44 @@ LPCWSTR red_light{L"play red_light.wav"};
 LPCWSTR stage_clear{L"play stage_clear.wav"};
 
 vector<int> songDuration = {60, 60, 60, 60, 60};
+
+// For display time
+auto startTime = chrono::system_clock::now();
+
+class GameCore
+{
+protected:
+	Player* player;
+	GraphicsController* graphic;
+	ILevel* levelController;
+	bool soundOn;
+	vector<bool> saved;
+
+public:
+	GameCore()
+	{
+		graphic = new GraphicsController;
+		player = new Player(70, 37, graphic);
+		levelController = nullptr;
+		soundOn = true;
+		for (int i = 0; i < 5; ++i)
+			saved.emplace_back(0);
+		for (int i = 0; i < 5; ++i)
+		{
+			string tmp = "SaveFile";
+			tmp += char(i + '1');
+			tmp += ".txt";
+			ifstream saveFile;
+			saveFile.open(tmp);
+			if (saveFile)
+				saved[i] = 1;
+			saveFile.close();
+		}
+		srand(time(0));
+	}
+	~GameCore()
+	{
+		delete graphic;
+		delete player;
+		delete levelController;
+	}
