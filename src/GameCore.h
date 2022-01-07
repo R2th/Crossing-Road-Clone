@@ -245,3 +245,16 @@ public:
 			graphic->render();
 		}
 	}
+	void loadingScreen()
+	{ // cuz why not
+		graphic->clearBuffer();
+		graphic->createFrame(0, 0, 145, 40);
+		graphic->createFrame(31, 27, 84, 3);
+		for (int i = 1; i < 81; i += 5)
+		{
+			vector<wstring> tmp = { L"█████" };
+			graphic->setBuffer(tmp, 32 + i, 28, BG, whiteDark);
+			graphic->render();
+			delay(83 - i);
+		}
+	}
