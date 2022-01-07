@@ -85,3 +85,40 @@ public:
 		delete player;
 		delete levelController;
 	}
+
+	void start()
+	{
+		introScreen();
+		titleScreen();
+	}
+	void introScreen()
+	{
+		graphic->createFrame(0, 0, 145, 40);
+
+		// loading bar, cuz why not
+		graphic->createFrame(30, 23, 85, 3);
+		for (int i = 1; i < 82; ++i)
+		{
+			vector<wstring> tmp = { L"█" };
+			graphic->setBuffer(tmp, 31 + i, 24, BG, whiteDark);
+			graphic->render();
+			delay(1);
+		}
+		vector<wstring> tmp = { L"PRESS ENTER TO CONTINUE" };
+		graphic->setBuffer(tmp, 58, 27, BG, whiteDark);
+		graphic->render();
+
+		int count = 0;
+		while (!GetAsyncKeyState(VK_RETURN))
+		{
+			delay(1000 / FRAMERATE);
+			count++;
+			if (count == 480)
+			{
+				GameMenu* easterEgg1 = new Button("easterEgg1");
+				graphic->setBuffer(graphic->getBuffer(easterEgg1->getBufferKey()), 28, 29, BG, 7);
+				graphic->render();
+			}
+		}
+		graphic->clearBuffer();
+	}
