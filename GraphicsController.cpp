@@ -200,15 +200,34 @@ void GraphicsController::setBufferWhite(vector<wstring>& content, int x, int y, 
 	}
 }
 
-void clearBuffer() {
+void GraphicsController::clearBuffer() {
 	for (int i = 0; i < screenWidth * screenHeight; ++i) {
 		color[i] = black * 16 + whiteDark;
 		buffer[i] = L' ';
 	}
 }
-void clearBuffer(int bg, int ch) {
+void GraphicsController::clearBuffer(int bg, int ch) {
 	for (int i = 0; i < screenWidth * screenHeight; ++i) {
 		color[i] = bg * 16 + ch;
 		buffer[i] = L' ';
+	}
+}
+
+void GraphicsController::render() {
+	WriteConsoleOutputAttribute(hConsole, color, screenWidth * screenHeight, { 0,0 }, &dwBytesWritten);
+	WriteConsoleOutputCharacter(hConsole, buffer, screenWidth * screenHeight, { 0,0 }, &dwBytesWritten);
+}
+void GraphicsController::renderAt(int x, int y, string key) {
+	vector<wstring> tmp = bufferStorage[key];
+	for (int i = 0; i < tmp.size(); i++)
+	{
+		for (int j = 0; j < tmp[i].length(); j++)
+		{
+			COORD t;
+			t.X = j;
+			t.Y = i;
+			WriteConsoleOutputAttribute(hConsole, &color[i * screenWidth + j], 1, t, &dwBytesWritten);
+			WriteConsoleOutputCharacter(hConsole, &buffer[i * screenWidth + j], 1, t, &dwBytesWritten);
+		}
 	}
 }
