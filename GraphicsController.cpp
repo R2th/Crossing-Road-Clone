@@ -124,3 +124,12 @@ void GraphicsController::createFrame(int x, int y, int w, int h, bool transparen
 		}
 	}
 }
+
+vector<wstring>& GraphicsController::getBuffer(string key)
+{
+	return bufferStorage[key];
+}
+
+bool GraphicsController::isInScreen(int y, int x) {
+	return 0 <= y && y < screenHeight - 1 && 0 <= x && x <= screenWidth - 1;
+}
