@@ -231,3 +231,61 @@ void GraphicsController::renderAt(int x, int y, string key) {
 		}
 	}
 }
+
+void GraphicsController::randomStars() {
+	if (randomInterval != 10) {
+		randomInterval++;
+		copyStarBuffer();
+		return;
+	}
+
+	randomInterval -= 10;
+	for (int i = 0; i < 70; ++i) {
+		int a = rand() % (screenWidth * screenHeight);
+		starBuffer[a] = L'.';
+	}
+	copyStarBuffer();
+}
+void GraphicsController::clearStars() {
+	if (randomInterval == 10)
+		for (int i = 0; i < screenWidth * screenHeight; ++i) {
+			starBuffer[i] = L' ';
+		}
+}
+void GraphicsController::copyStarBuffer() {
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		if (starBuffer[i] == L'.') {
+			buffer[i] = L'.';
+			color[i] = black * 16 + white;
+		}
+	}
+}
+// custom star
+void GraphicsController::randomStars(int bg, int ch) {
+	if (randomInterval != 10) {
+		randomInterval++;
+		copyStarBuffer(bg, ch);
+		return;
+	}
+
+	randomInterval -= 10;
+	for (int i = 0; i < 70; ++i) {
+		int a = rand() % (screenWidth * screenHeight);
+		starBuffer[a] = L'.';
+	}
+	copyStarBuffer(bg, ch);
+}
+void GraphicsController::clearStars(int bg, int ch) {
+	if (randomInterval == 10)
+		for (int i = 0; i < screenWidth * screenHeight; ++i) {
+			starBuffer[i] = L' ';
+		}
+}
+void GraphicsController::copyStarBuffer(int bg, int ch) {
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		if (starBuffer[i] == L'.') {
+			buffer[i] = L'.';
+			color[i] = bg * 16 + ch;
+		}
+	}
+}
