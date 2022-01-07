@@ -328,4 +328,42 @@ public:
 
 			graphic->render();
 		}
+	}void clearLevelScreen(int Level, int Score)
+	{
+		int top = 15;
+		int left = 57;
+		graphic->openFrame(left, top, 34, 15);
+
+		GameMenu* clearLevelTitle = new Button("clearLevelTitle");
+		graphic->setBufferWhite(graphic->getBuffer(clearLevelTitle->getBufferKey()), left + 1, top + 2, 0, 7);
+		GameMenu* continueButton = new Button("continueButton");
+
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 }; // Check ingame input
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+
+			// default color
+			graphic->setBuffer(L"YOU PASSED LEVEL " + to_wstring(Level) + L" WITH:", left + 4, top + 4, 0, 7);
+			graphic->setBuffer(to_wstring(Score), left + 15, top + 6, 0, 7);
+			graphic->setBuffer(L"SCORE TO PASS NEXT LEVEL: ", left + 4, top + 8, 0, 7);
+			graphic->setBuffer(to_wstring(threshold[Level]), left + 15, top + 10, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(continueButton->getBufferKey()), left + 10, top + 12, 7, 0);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{ // Enter - select
+				if (soundOn)
+				{
+					mciSendString(enter, NULL, 0, NULL);
+					return;
+				}
+				Sleep(1000);
+			}
+
+			graphic->render();
+		}
 	}
