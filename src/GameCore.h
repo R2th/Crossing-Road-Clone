@@ -937,3 +937,371 @@ public:
 			graphic->render();
 		}
 	};
+	void loadScreen()
+	{
+		int top = 8;
+		int left = 58;
+		vector<wstring> blank = { L"███████████████████████" };
+		vector<wstring> save{ L"" };
+		vector<wstring> gameScore;
+		graphic->openFrame(left, top - 1, 29, 24);
+		GameMenu* saveTitle = new Button("loadTitle");
+		graphic->setBufferWhite(graphic->getBuffer(saveTitle->getBufferKey()), left + 1, top + 1, 0, 7);
+		GameMenu* slots = new Button("slots");
+		graphic->createFrame(left + 2, top + 4, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 7, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 10, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 13, blank[0].length() + 2, 3);
+		graphic->createFrame(left + 2, top + 16, blank[0].length() + 2, 3);
+		GameMenu* backButton = new Button("back");
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 };
+
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+
+			// default color
+			graphic->setBuffer(graphic->getBuffer(slots->getBufferKey()), left + 7, top + 2, 0, 7);
+			for (int i = 0; i < 5; ++i)
+			{
+				if (saved[i])
+				{
+					string tmp = "SaveFile";
+					tmp += char(i + '1');
+					tmp += ".txt";
+					ifstream saveFile{ tmp };
+					int tmpScore;
+					saveFile >> tmpScore;
+
+					string mode;
+					saveFile >> mode;
+					wstring tmpppp;
+					if (mode[0] == 'i')
+					{
+						save[0] = L"Endless. Score: ";
+						tmpppp = toWstring(tmpScore);
+					}
+					else
+					{
+						int Level;
+						saveFile >> Level;
+						save[0] = L"Timed. Level: ";
+						tmpppp = toWstring(Level);
+					}
+					save[0] += tmpppp;
+
+					int saveLength = save[0].length();
+
+					int n = blank[0].length() - save[0].length();
+					for (int j = 0; j < n; ++j)
+					{
+						save[0] += L' ';
+					}
+					graphic->setBufferWhite(save, left + 3, top + 5 + 3 * i, BG, whiteDark);
+
+					save[0].erase(saveLength, save[0].length() - tmpppp.length());
+					saveFile.close();
+				}
+				else
+					graphic->setBufferWhite(blank, left + 3, top + 5 + 3 * i, whiteDark, BG);
+			}
+			graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 20, 0, 7);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 5)
+					return;
+				else
+				{
+					string tmp = "SaveFile";
+					tmp += char(choice + '1');
+					tmp += ".txt";
+					ifstream saveFile{ tmp };
+					int score;
+					saveFile >> score;
+					string mode;
+					saveFile >> mode;
+
+					if (mode[0] == 'i')
+					{
+						mciSendString(L"pause song_intro.wav", NULL, 0, NULL);
+						loadingScreen();
+						int level = 1;
+						while (level)
+						{
+							level = playScreen(level, score);
+						}
+						if (soundOn)
+							mciSendString(L"resume song_intro.wav", NULL, 0, NULL);
+					}
+					else
+					{
+						int level;
+						saveFile >> level;
+						mciSendString(L"pause song_intro.wav", NULL, 0, NULL);
+						loadingScreen();
+						while (level)
+						{
+							level = playScreen1(level, 0);
+						}
+						if (soundOn)
+							mciSendString(L"resume song_intro.wav", NULL, 0, NULL);
+					}
+
+					saveFile.close();
+					return;
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 6 - 1) % 6;
+			}
+			else if (bKeyGame[2] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 6;
+			}
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 5:
+				graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 20, 7, 0);
+				break;
+			default:
+				if (saved[choice])
+				{
+					string tmp = "SaveFile";
+					tmp += char(choice + '1');
+					tmp += ".txt";
+					ifstream saveFile{ tmp };
+					int tmpScore;
+					saveFile >> tmpScore;
+
+					string mode;
+					saveFile >> mode;
+					wstring tmpppp;
+					if (mode[0] == 'i')
+					{
+						save[0] = L"Endless. Score: ";
+						tmpppp = toWstring(tmpScore);
+					}
+					else
+					{
+						int Level;
+						saveFile >> Level;
+						save[0] = L"Timed. Level: ";
+						tmpppp = toWstring(Level);
+					}
+					save[0] += tmpppp;
+
+					int saveLength = save[0].length();
+
+					int n = blank[0].length() - save[0].length();
+					for (int j = 0; j < n; ++j)
+					{
+						save[0] += L' ';
+					}
+					graphic->setBufferWhite(save, left + 3, top + 5 + 3 * choice, whiteDark, BG);
+
+					save[0].erase(saveLength, save[0].length() - tmpppp.length());
+					saveFile.close();
+				}
+				else
+					graphic->setBufferWhite(blank, left + 3, top + 5 + 3 * choice, BG, whiteDark);
+				break;
+			}
+
+			graphic->render();
+		}
+	};
+
+	void settingsScreen()
+	{
+		int top = 19;
+		int left = 58;
+		graphic->openFrame(left, top, 28, 8);
+		GameMenu* settingsTitle = new Button("settingsTitle");
+		graphic->setBufferWhite(graphic->getBuffer(settingsTitle->getBufferKey()), left + 1, top + 2, 0, 7);
+
+		GameMenu* backButton = new Button("back");
+		GameMenu* soundButton = new Button("sound");
+		GameMenu* on = new Button("on");
+		GameMenu* off = new Button("off");
+
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 }; // Check ingame input
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+
+			// default color
+			graphic->setBuffer(graphic->getBuffer(soundButton->getBufferKey()), left + 9, top + 4, 0, 7);
+			if (soundOn)
+				graphic->setBuffer(graphic->getBuffer(on->getBufferKey()), left + 9 + 6, top + 4, 0, 7);
+			else
+				graphic->setBuffer(graphic->getBuffer(off->getBufferKey()), left + 9 + 6, top + 4, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 5, 0, 7);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 0)
+				{
+					soundOn = !soundOn;
+					if (soundOn)
+						mciSendString(L"resume song_intro.wav", NULL, 0, NULL);
+					else
+						mciSendString(L"pause song_intro.wav", NULL, 0, NULL);
+				}
+				else
+				{
+					graphic->clearBuffer();
+					return;
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 2 - 1) % 2;
+			}
+			else if (bKeyGame[2] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 2;
+			}
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 0:
+				graphic->setBuffer(graphic->getBuffer(soundButton->getBufferKey()), left + 9, top + 4, 7, 0);
+				if (soundOn)
+					graphic->setBuffer(graphic->getBuffer(on->getBufferKey()), left + 9 + 6, top + 4, 7, 0);
+				else
+					graphic->setBuffer(graphic->getBuffer(off->getBufferKey()), left + 9 + 6, top + 4, 7, 0);
+				break;
+			case 1:
+				graphic->setBuffer(graphic->getBuffer(backButton->getBufferKey()), left + 9, top + 5, 7, 0);
+				break;
+			default:
+				break;
+			}
+
+			graphic->render();
+		}
+	};
+	bool pauseScreen(int score = 0, int mode = 0, int level = 0)
+	{
+		int top = 15;
+		int left = 60;
+		graphic->openFrame(left, top, 25, 10);
+		GameMenu* pauseTitle = new Button("pauseTitle");
+		graphic->setBufferWhite(graphic->getBuffer(pauseTitle->getBufferKey()), left + 1, top + 2, 0, 7);
+		GameMenu* resumeButton = new Button("resumeButton");
+		GameMenu* restartButton = new Button("restartButton");
+		GameMenu* saveButton = new Button("saveButton");
+		GameMenu* soundButton = new Button("sound");
+		GameMenu* on = new Button("on");
+		GameMenu* off = new Button("off");
+		int choice = 0;
+		bool* bKeyGame = new bool[key.size()]{ 0 };
+
+		while (1)
+		{
+			delay(1000 / (FRAMERATE / 8));
+			// default color
+			graphic->setBuffer(graphic->getBuffer(resumeButton->getBufferKey()), left + 7, top + 4, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(restartButton->getBufferKey()), left + 7, top + 5, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(saveButton->getBufferKey()), left + 7, top + 6, 0, 7);
+			graphic->setBuffer(graphic->getBuffer(soundButton->getBufferKey()), left + 7, top + 7, 0, 7);
+			if (soundOn)
+				graphic->setBuffer(graphic->getBuffer(on->getBufferKey()), left + 13, top + 7, 0, 7);
+			else
+				graphic->setBuffer(graphic->getBuffer(off->getBufferKey()), left + 13, top + 7, 0, 7);
+
+			// input
+			for (int i = 0; i < key.size(); i++)
+				bKeyGame[i] = (GetAsyncKeyState(key.at(i))) != 0;
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				if (soundOn)
+					mciSendString(enter, NULL, 0, NULL);
+				if (choice == 3)
+				{ // sound
+					soundOn = !soundOn;
+					if (soundOn)
+						mciSendString(L"resume song_game_1.wav", NULL, 0, NULL);
+					else
+						mciSendString(L"pause song_game_1.wav", NULL, 0, NULL);
+				}
+				else if (choice == 0)
+				{ // resume
+					graphic->clearBuffer();
+					return 1;
+				}
+				else if (choice == 2)
+				{ // save
+					saveScreen(score, mode, level);
+					return 1;
+				}
+				else
+				{ // restart
+					mciSendString(L"stop song_game_1.wav", NULL, 0, NULL);
+					return 0;
+				}
+			}
+			else if (bKeyGame[0] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 4 - 1) % 4;
+			}
+			else if (bKeyGame[2] == 1)
+			{
+				if (soundOn)
+					PlaySound(TEXT("menuClick.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				choice = (choice + 1) % 4;
+			}
+
+			// change color depends on choice
+			switch (choice)
+			{
+			case 0:
+				graphic->setBuffer(graphic->getBuffer(resumeButton->getBufferKey()), left + 7, top + 4, 7, 0);
+				break;
+			case 1:
+				graphic->setBuffer(graphic->getBuffer(restartButton->getBufferKey()), left + 7, top + 5, 7, 0);
+				break;
+			case 2:
+				graphic->setBuffer(graphic->getBuffer(saveButton->getBufferKey()), left + 7, top + 6, 7, 0);
+				break;
+			case 3:
+				graphic->setBuffer(graphic->getBuffer(soundButton->getBufferKey()), left + 7, top + 7, 7, 0);
+				if (soundOn)
+					graphic->setBuffer(graphic->getBuffer(on->getBufferKey()), left + 13, top + 7, 7, 0);
+				else
+					graphic->setBuffer(graphic->getBuffer(off->getBufferKey()), left + 13, top + 7, 7, 0);
+				break;
+			default:
+				break;
+			}
+
+			graphic->render();
+		}
+	};
