@@ -199,3 +199,16 @@ void GraphicsController::setBufferWhite(vector<wstring>& content, int x, int y, 
 		}
 	}
 }
+
+void clearBuffer() {
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		color[i] = black * 16 + whiteDark;
+		buffer[i] = L' ';
+	}
+}
+void clearBuffer(int bg, int ch) {
+	for (int i = 0; i < screenWidth * screenHeight; ++i) {
+		color[i] = bg * 16 + ch;
+		buffer[i] = L' ';
+	}
+}
